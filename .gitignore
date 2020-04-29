@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# Ninja
+build.ninja
+.ninja_*
+compile_commands.json
+
+# SCons
+build/*
+
+# Python
+__pycache__
