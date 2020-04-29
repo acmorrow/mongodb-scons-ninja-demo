@@ -44,7 +44,6 @@ env_vars.Add('__NINJA_NO',
 
 env = Environment(
     variables=env_vars,
-    NINJA_SYNTAX="#site_scons/third_party/ninja_syntax.py",
     VARIANT_DIR='$BUILD_DIR/variant'
 )
 

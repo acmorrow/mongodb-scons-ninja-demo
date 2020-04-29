@@ -29,6 +29,8 @@ import io
 import shutil
 import shlex
 
+from ninja import ninja_syntax
+
 from glob import glob
 from os.path import join as joinpath
 from os.path import splitext
@@ -39,7 +41,6 @@ from SCons.Util import is_List, flatten_sequence
 from SCons.Script import COMMAND_LINE_TARGETS
 
 NINJA_STATE = None
-NINJA_SYNTAX = "NINJA_SYNTAX"
 NINJA_RULES = "__NINJA_CUSTOM_RULES"
 NINJA_POOLS = "__NINJA_CUSTOM_POOLS"
 NINJA_CUSTOM_HANDLERS = "__NINJA_CUSTOM_HANDLERS"
@@ -1182,7 +1183,6 @@ def exists(env):
 
 def generate(env):
     """Generate the NINJA builders."""
-    env[NINJA_SYNTAX] = env.get(NINJA_SYNTAX, "ninja_syntax.py")
 
     # Add the Ninja builder.
     always_exec_ninja_action = AlwaysExecAction(ninja_builder, {})
@@ -1367,23 +1367,6 @@ def generate(env):
     # than the Parallel job class for generating Ninja files. So we
     # monkey the Jobs constructor to only use the Serial Job class.
     SCons.Job.Jobs.__init__ = ninja_always_serial
-
-    # The environment variable NINJA_SYNTAX points to the
-    # ninja_syntax.py module from the ninja sources found here:
-    # https://github.com/ninja-build/ninja/blob/master/misc/ninja_syntax.py
-    #
-    # This should be vendored into the build sources and it's location
-    # set in NINJA_SYNTAX. This code block loads the location from
-    # that variable, gets the absolute path to the vendored file, gets
-    # it's parent directory then uses importlib to import the module
-    # dynamically.
-    ninja_syntax_file = env[NINJA_SYNTAX]
-    if isinstance(ninja_syntax_file, str):
-        ninja_syntax_file = env.File(ninja_syntax_file).get_abspath()
-    ninja_syntax_mod_dir = os.path.dirname(ninja_syntax_file)
-    sys.path.append(ninja_syntax_mod_dir)
-    ninja_syntax_mod_name = os.path.basename(ninja_syntax_file)
-    ninja_syntax = importlib.import_module(ninja_syntax_mod_name.replace(".py", ""))
 
     global NINJA_STATE
     NINJA_STATE = NinjaState(env, ninja_syntax.Writer)
